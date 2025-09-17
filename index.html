@@ -13,7 +13,7 @@
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 
-const ws = new WebSocket('wss://yourservice.onrender.com'); // <- put your Render URL here
+const ws = new WebSocket('wss://your-render-service.onrender.com'); // <- replace with your Render WSS URL
 let myId, players = {};
 
 ws.onmessage = e => {
