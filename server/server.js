@@ -6,7 +6,7 @@ const wss = new WebSocket.Server({ port });
 let players = {};
 
 wss.on('connection', ws => {
-  const id = Date.now() + Math.random(); // unique ID
+  const id = Date.now() + Math.random(); // simple unique ID
   players[id] = { x: Math.random()*500, y: Math.random()*500 };
 
   // send initial state
