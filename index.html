@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Multiplayer Circles</title>
+  <style>
+    body { margin:0; overflow:hidden; background:#111; }
+    canvas { display:block; margin:auto; background:#111; }
+  </style>
+</head>
+<body>
+<canvas width="500" height="500"></canvas>
+<script>
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+
+const ws = new WebSocket('wss://yourservice.onrender.com'); // <- put your Render URL here
+let myId, players = {};
+
+ws.onmessage = e => {
+  const data = JSON.parse(e.data);
+  if (data.type === 'init') {
+    myId = data.id;
+    players = data.players;
+  } else if (data.type === 'update') {
+    players = data.players;
+  }
+};
+
+// movement
+let keys = {};
+window.addEventListener('keydown', e => keys[e.key] = true);
+window.addEventListener('keyup', e => keys[e.key] = false);
+
+const speed = 2;
+
+function loop() {
+  if (!myId || !players[myId]) return requestAnimationFrame(loop);
+  let p = players[myId];
+
+  if (keys['ArrowUp'] || keys['w']) p.y -= speed;
+  if (keys['ArrowDown'] || keys['s']) p.y += speed;
+  if (keys['ArrowLeft'] || keys['a']) p.x -= speed;
+  if (keys['ArrowRight'] || keys['d']) p.x += speed;
+
+  // send position
+  ws.send(JSON.stringify({ type:'move', x: p.x, y: p.y }));
+
+  // draw
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for (let id in players) {
+    let pl = players[id];
+    ctx.beginPath();
+    ctx.arc(pl.x, pl.y, 15, 0, Math.PI*2);
+    ctx.fillStyle = id === myId ? 'lime' : 'red';
+    ctx.fill();
+  }
+
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+</body>
+</html>
